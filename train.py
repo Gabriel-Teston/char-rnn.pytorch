@@ -52,7 +52,10 @@ def random_training_set(chunk_len, batch_size):
 def train(inp, target):
     hidden = decoder.init_hidden(args.batch_size)
     if args.cuda:
-        hidden = hidden.cuda()
+        if args.model == "gru":
+            hidden = hidden.cuda()
+        else:
+            hidden = (hidden[0].cuda(), hidden[1].cuda())
     decoder.zero_grad()
     loss = 0
 
@@ -63,7 +66,7 @@ def train(inp, target):
     loss.backward()
     decoder_optimizer.step()
 
-    return loss.data[0] / args.chunk_len
+    return loss.item() / args.chunk_len
 
 def save():
     save_filename = os.path.splitext(os.path.basename(args.filename))[0] + '.pt'
@@ -105,4 +108,3 @@ try:
 except KeyboardInterrupt:
     print("Saving before quit...")
     save()
-
